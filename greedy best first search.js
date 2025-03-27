@@ -169,8 +169,6 @@ class MinQueue {
     }
 }
 
-
-
 class priorityQueue {
   constructor(size) {
     //the queue will receive distances of cells
@@ -199,6 +197,7 @@ class priorityQueue {
   }
 
 }
+
 document.getElementById("fakefileinput").addEventListener("keydown", function(event){
 	console.log(event.key);
 	if(event.key == "Enter"){
@@ -247,26 +246,25 @@ class BFSMazeApp{
 		this.graphicalMaze = tbody;
 	}
 	handleTabletChange(e) {
-		  // Check if the media query is true
-		  //solved with  this.handleTabletChange.bind(this) //which gave the function the necessary value of this as a reference of the class (and thus the possibility to call this. handleTabletChange, and give it this.graphicalMaze) and instead of the MediaQueryList value (which is passed as the e parameter)
-		  //previously: THE VALUE OF this WHEN CALLED FROM this.handleTabletChange(mediaQuery); => IS THE CLASS BFSMazeApp, AS EXPECTED
-		  //HOWEVER, THE VALUE OF this WHEN CALLED FROM mediaQuery.addListener(this.handleTabletChange); IS MediaQueryList!!!!!!
-		  //MediaQueryList { media: "(max-width: 954px)", matches: false, onchange: null }
-			// matches: false
-			// media: "(max-width: 954px)"
+		/*Check if the media query is true
+		solved with  this.handleTabletChange.bind(this) //which gave the function the necessary value of this as a reference of the class (and thus the possibility to call this. handleTabletChange, and give it this.graphicalMaze) and instead of the MediaQueryList value (which is passed as the e parameter)
+		previously: THE VALUE OF this WHEN CALLED FROM this.handleTabletChange(mediaQuery); => IS THE CLASS BFSMazeApp, AS EXPECTED
+		HOWEVER, THE VALUE OF this WHEN CALLED FROM mediaQuery.addListener(this.handleTabletChange); IS MediaQueryList!!!!!!
+		MediaQueryList { media: "(max-width: 954px)", matches: false, onchange: null }
+			matches: false
+			media: "(max-width: 954px)"
+		*/
 			
-			let tableElement = this.graphicalMaze.parentElement;
-		  if (e.matches) {
+		let tableElement = this.graphicalMaze.parentElement;
+		if (e.matches) {
 		    // Then log the following message to the console
 		    console.log('Media Query Matched!');
 		    tableElement.className = "useFullWidthForMobile"; //same as document.getElementById("tableParent")
-
-		  }else{
+		}else{
 		    console.log("media query not matched");
 		    tableElement.className = "";
-
-		  }
 		}
+	}
 
 	tryToFitTheMazeOnScreen(){
 
@@ -346,189 +344,191 @@ class BFSMazeApp{
 	    }
 	    console.log("this.startCoordinates", this.startCoordinates)
 	    
-	  }
-	  presentResult(){
-	  	let row = this.graphicalMaze.insertRow()
-	  	let holder = row.insertCell();
-	  	holder.colSpan = this.pocetColumns //77;
-	  	holder.className = "presentResult";
-	  	holder.innerHTML = "<span class='pathText'>Path</span> length from <span class='startText'>start</span> to end is " + this.delkaCestyPocetIterations + " cells long, while the main loop ran " + this.mainLoopPocetIterations + " times and " + this.pocetProjdenychPoli + " cells were searched"; //this.delkaCesty + " " vraci spatne vysledky (rucne jsem to prepocitaval, spravne vysledky vraci this.delkaCestyPocetIterations)
-	  }
-	  async startBFS(){ //async so I can use wait function
-			//each item in the fronta queue has a row number, a column number and the distance from start (= length of the path) 
-			//coordinates (row : column), distance
-			//tuple, integer
-			// (67, 11), 0
-			this.startCoordinates.reverse();
-			this.endCoordinates.reverse();
+	}
+	
+	presentResult(){
+		let row = this.graphicalMaze.insertRow()
+		let holder = row.insertCell();
+		holder.colSpan = this.pocetColumns;
+		holder.className = "presentResult";
+		holder.innerHTML = "<span class='pathText'>Path</span> length from <span class='startText'>start</span> to end is " + this.delkaCestyPocetIterations + " cells long, while the main loop ran " + this.mainLoopPocetIterations + " times and " + this.pocetProjdenychPoli + " cells were searched"; //this.delkaCesty + " " vraci spatne vysledky (rucne jsem to prepocitaval, spravne vysledky vraci this.delkaCestyPocetIterations)
+	}
+	
+	async startBFS(){ //async so I can use wait function
+		//each item in the fronta queue has a row number, a column number and the distance from start (= length of the path) 
+		//coordinates (row : column), distance
+		//tuple, integer
+		// (67, 11), 0
+		this.startCoordinates.reverse();
+		this.endCoordinates.reverse();
 
-			this.fronta.push([this.startCoordinates, 0]);
-			this.addClassToCell(this.startCoordinates, "start");
-			this.addClassToCell(this.endCoordinates, "end");
-			console.time("run");
-			this.runBFS();
-		}
-		async runBFS(){
-			let evaluatedVrchol, priority;
-			console.log(this.fronta);
-			while(this.fronta.length > 0 && this.zcelaHotovo == false){
-				evaluatedVrchol = this.fronta.pop();
-				console.error("compare field", evaluatedVrchol, "with end", this.endCoordinates) //just for aestetic purposes, not an error
-				//=>IN PYTHON, evaluatedVrchol == this.endCoordinates WORKS
-				//=>IN JS, that would compare memory locations, so I use String()
-				//performance OK, the arrays have 2 items each
-				if(String(evaluatedVrchol) == String(this.endCoordinates)){
-					this.zcelaHotovo = true;
-					//return; //pridan return, protoze jinak to jeste najde jednu polozku za cilem, tu se to pokusi hodit do heap a pak se to posere, memory leak
-					try{
-						this.calculatePath();
-					}catch(TypeError){ // TypeError: can't access property Symbol.iterator, coordinates is undefined
-						alert("queue is empty before end was found, wtf")
-					}
-					this.presentResult();
-					console.timeEnd("run");
-				}
-				await wait(parseInt(animationDelay.value));
-				await this.evaluateKolemPole(evaluatedVrchol, this.endCoordinates);
-				this.mainLoopPocetIterations += 1;
-			}
+		this.fronta.push([this.startCoordinates, 0]);
+		this.addClassToCell(this.startCoordinates, "start");
+		this.addClassToCell(this.endCoordinates, "end");
+		console.time("run");
+		this.runBFS();
 	}
 
-		calculatePath(){
-			let pole = this.endCoordinates;
-			this.customCalculatePath(pole);
-		}
-
-		customCalculatePath(coordinates){
-			let pole = coordinates;
-			this.addClassToCell(coordinates, "end");
-			//to compare coordinates which are arrays with two items
-			while(String(pole) !== String(this.startCoordinates)){
-				this.delkaCestyPocetIterations += 1;
-				pole = this.zJakehoPoleJsmeSemPrisli[pole];
-				this.addClassToCell(pole, "cesta2");			
-			}
-		}
-
-		async najdiOkolniPole(coordinates){
-			let column = coordinates[1]
-			let row = coordinates[0]
-			let okolniPolePos = [];
-
-			if(row > 0){
-				if(this.maze[row - 1][column] != "X"){
-					okolniPolePos.push([row - 1, column]);
+	async runBFS(){
+		let evaluatedVrchol, priority;
+		console.log(this.fronta);
+		while(this.fronta.length > 0 && this.zcelaHotovo == false){
+			evaluatedVrchol = this.fronta.pop();
+			console.error("compare field", evaluatedVrchol, "with end", this.endCoordinates) //just for aestetic purposes, not an error
+			//=>IN PYTHON, evaluatedVrchol == this.endCoordinates WORKS
+			//=>IN JS, that would compare memory locations, so I use String()
+			//performance OK, the arrays have 2 items each
+			if(String(evaluatedVrchol) == String(this.endCoordinates)){
+				this.zcelaHotovo = true;
+				//return; //pridan return, protoze jinak to jeste najde jednu polozku za cilem, tu se to pokusi hodit do heap a pak se to posere, memory leak
+				try{
+					this.calculatePath();
+				}catch(TypeError){ // TypeError: can't access property Symbol.iterator, coordinates is undefined
+					alert("queue is empty before end was found, wtf")
 				}
-			}
-			//is last row
-			if(row < this.pocetRows - 1){
-				if(this.maze[row + 1][column] != "X"){
-					okolniPolePos.push([row + 1, column]);
-				}
-			}
-			if(column > 0){
-				if(this.maze[row][column - 1] != "X"){
-					okolniPolePos.push([row, column - 1]);
-				}
-			}
-			//is last column
-			if(column < this.pocetColumns - 1){
-				if(this.maze[row][column + 1] != "X"){
-					okolniPolePos.push([row, column + 1]);
-				}
-			}
-			console.log(okolniPolePos);
-			return okolniPolePos;
-		}
-
-		calculateDistance(coordinates){ //used to detemine the priority of the neighbor
-			let row, column;
-			let rowEnd, columnEnd;
-			[row, column] = coordinates;
-			[rowEnd, columnEnd] = this.endCoordinates;
-
-			//uses the Pythagorian theorem to calculate the distance
-			let a = Math.abs(rowEnd - row);
-			let b = Math.abs(columnEnd - column);
-			let c = a**2 + b**2;
-
-			//interestingly, it is finds shorter paths this way:
-				// on 114.txt 116 cells long using return c
-				// on 114.txt 128 cells long using Math.sqrt(c)
-				//(both results still longer than paths found by BFS)
-			//return c; //The heap uses 32 bit unsigned integers, where the max value is 4,294,967,295, so I can keep it as is, skip Math.sqrt(c) 
-			//return Math.sqrt(c); (because the float gets implicitly floored to integer by JS when being added to the heap (which uses typed Uint32Arrays) => which causes imprecision)
-			//doing Math.round(Math.sqrt(c)) explicitly would cause a longer path being computed as well, for the same reasons, it is imprecise, compared to the original float (which is reasonably precise in heap implentations which accept floats for priorities) 
-			//but of course, when integers are required, returning c is the best solution
-			//it is still well worth it, because this implementation based on heapify.js with typed Arrays is 1.5 times faster than the equivalent using tinyqueue.js with normal JS Arrays
-			return c;
-		}
-		
-		async evaluateKolemPole(coordinates, end) {
-			let okolniPolePosLoc = await this.najdiOkolniPole(coordinates);
-			this.addClassToCell(coordinates, "considered");
-			//this.consideredCellCoordinatesDisplay.textContent = coordinates;
-			await wait(parseInt(animationDelay.value)) // so that the viewer can prepare for new surrounding fields
-			for (let x = 0; x < okolniPolePosLoc.length; x++) {
-				let pole = okolniPolePosLoc[x];
-
-				if(pole in this.poleVidena){
-					console.log("skips");
-					this.addClassToCell(okolniPolePosLoc[x],"skipped")
-				}else{
-					this.addClassToCell(okolniPolePosLoc[x], "visited");
-					this.poleVidena[okolniPolePosLoc[x]] = this.delkaCesty + 1;
-					this.delkaCesty += 1;
-					this.fronta.push([okolniPolePosLoc[x], this.calculateDistance(okolniPolePosLoc[x])]);
-					this.zJakehoPoleJsmeSemPrisli[okolniPolePosLoc[x]] = coordinates;
-				}
-				this.pocetProjdenychPoli += 1;
+				this.presentResult();
+				console.timeEnd("run");
 			}
 			await wait(parseInt(animationDelay.value));
-			this.removeClassFromCell(coordinates, "considered");
+			await this.evaluateKolemPole(evaluatedVrchol, this.endCoordinates);
+			this.mainLoopPocetIterations += 1;
 		}
+	}
 
-		addClassToCell(coordinates, className){
-			//coordinates are row : column
-			//tables (tbody) support only rows : column (cells is the method of td only, not tbody) 
-			let row, column;
-			[row, column] = coordinates;
-			try{
-				this.graphicalMaze.rows[row].cells[column].classList.add(className);
-			}catch(TypeError){
-				console.warn("TypeError caught", "row", row, "column", column);
+	calculatePath(){
+		let pole = this.endCoordinates;
+		this.customCalculatePath(pole);
+	}
+
+	customCalculatePath(coordinates){
+		let pole = coordinates;
+		this.addClassToCell(coordinates, "end");
+		//to compare coordinates which are arrays with two items
+		while(String(pole) !== String(this.startCoordinates)){
+			this.delkaCestyPocetIterations += 1;
+			pole = this.zJakehoPoleJsmeSemPrisli[pole];
+			this.addClassToCell(pole, "cesta2");			
+		}
+	}
+
+	async najdiOkolniPole(coordinates){
+		let column = coordinates[1]
+		let row = coordinates[0]
+		let okolniPolePos = [];
+
+		if(row > 0){
+			if(this.maze[row - 1][column] != "X"){
+				okolniPolePos.push([row - 1, column]);
 			}
 		}
-		removeClassFromCell(coordinates, className){
-			let row, column;
-			[row, column] = coordinates;
-			try{
-				this.graphicalMaze.rows[row].cells[column].classList.remove(className);
-			}catch(TypeError){
-				console.warn("TypeError caught", "row", row, "column", column);
+		//is last row
+		if(row < this.pocetRows - 1){
+			if(this.maze[row + 1][column] != "X"){
+				okolniPolePos.push([row + 1, column]);
 			}
-
 		}
-
-		attachClickListenerToDrawPathToAnyField(){
-			this.graphicalMaze.addEventListener("click", function(e){
-				let a = e.target;
-				if(a.matches("td.presentResult")){
-					return;
-				}else if(a.matches("div.s")){
-					console.log("skrrrt", this);
-													//div  td 					tr 										div		td
-					let coordinates = [a.parentElement.parentElement.rowIndex, a.parentElement.cellIndex];
-					console.log(coordinates);
-					this.customCalculatePath(coordinates); //this.calculatePath is not a function => need to bind this
-				}else if(a.matches("td")){
-					console.log("brrr");
-					let coordinates = [a.parentElement.rowIndex, a.cellIndex];
-					this.customCalculatePath(coordinates);
-				}
-			}.bind(this));
+		if(column > 0){
+			if(this.maze[row][column - 1] != "X"){
+				okolniPolePos.push([row, column - 1]);
+			}
 		}
+		//is last column
+		if(column < this.pocetColumns - 1){
+			if(this.maze[row][column + 1] != "X"){
+				okolniPolePos.push([row, column + 1]);
+			}
+		}
+		console.log(okolniPolePos);
+		return okolniPolePos;
+	}
 
+	calculateDistance(coordinates){ //used to detemine the priority of the neighbor
+		let row, column;
+		let rowEnd, columnEnd;
+		[row, column] = coordinates;
+		[rowEnd, columnEnd] = this.endCoordinates;
+
+		//uses the Pythagorian theorem to calculate the distance
+		let a = Math.abs(rowEnd - row);
+		let b = Math.abs(columnEnd - column);
+		let c = a**2 + b**2;
+
+		//interestingly, it is finds shorter paths this way:
+			// on 114.txt 116 cells long using return c
+			// on 114.txt 128 cells long using Math.sqrt(c)
+			//(both results still longer than paths found by BFS)
+		//return c; //The heap uses 32 bit unsigned integers, where the max value is 4,294,967,295, so I can keep it as is, skip Math.sqrt(c) 
+		//return Math.sqrt(c); (because the float gets implicitly floored to integer by JS when being added to the heap (which uses typed Uint32Arrays) => which causes imprecision)
+		//doing Math.round(Math.sqrt(c)) explicitly would cause a longer path being computed as well, for the same reasons, it is imprecise, compared to the original float (which is reasonably precise in heap implentations which accept floats for priorities) 
+		//but of course, when integers are required, returning c is the best solution
+		//it is still well worth it, because this implementation based on heapify.js with typed Arrays is 1.5 times faster than the equivalent using tinyqueue.js with normal JS Arrays
+		return c;
+	}
+		
+	async evaluateKolemPole(coordinates, end) {
+		let okolniPolePosLoc = await this.najdiOkolniPole(coordinates);
+		this.addClassToCell(coordinates, "considered");
+		//this.consideredCellCoordinatesDisplay.textContent = coordinates;
+		await wait(parseInt(animationDelay.value)) // so that the viewer can prepare for new surrounding fields
+		for (let x = 0; x < okolniPolePosLoc.length; x++) {
+			let pole = okolniPolePosLoc[x];
+
+			if(pole in this.poleVidena){
+				console.log("skips");
+				this.addClassToCell(okolniPolePosLoc[x],"skipped")
+			}else{
+				this.addClassToCell(okolniPolePosLoc[x], "visited");
+				this.poleVidena[okolniPolePosLoc[x]] = this.delkaCesty + 1;
+				this.delkaCesty += 1;
+				this.fronta.push([okolniPolePosLoc[x], this.calculateDistance(okolniPolePosLoc[x])]);
+				this.zJakehoPoleJsmeSemPrisli[okolniPolePosLoc[x]] = coordinates;
+			}
+			this.pocetProjdenychPoli += 1;
+		}
+		await wait(parseInt(animationDelay.value));
+		this.removeClassFromCell(coordinates, "considered");
+	}
+
+	addClassToCell(coordinates, className){
+		//coordinates are row : column
+		//tables (tbody) support only rows : column (cells is the method of td only, not tbody) 
+		let row, column;
+		[row, column] = coordinates;
+		try{
+			this.graphicalMaze.rows[row].cells[column].classList.add(className);
+		}catch(TypeError){
+			console.warn("TypeError caught", "row", row, "column", column);
+		}
+	}
+	removeClassFromCell(coordinates, className){
+		let row, column;
+		[row, column] = coordinates;
+		try{
+			this.graphicalMaze.rows[row].cells[column].classList.remove(className);
+		}catch(TypeError){
+			console.warn("TypeError caught", "row", row, "column", column);
+		}
+	}
+
+	attachClickListenerToDrawPathToAnyField(){
+		this.graphicalMaze.addEventListener("click", function(e){
+			let a = e.target;
+			if(a.matches("td.presentResult")){
+				return;
+			}else if(a.matches("div.s")){
+				console.log("skrrrt", this);
+												//div  td 					tr 										div		td
+				let coordinates = [a.parentElement.parentElement.rowIndex, a.parentElement.cellIndex];
+				console.log(coordinates);
+				this.customCalculatePath(coordinates); //this.calculatePath is not a function => need to bind this
+			}else if(a.matches("td")){
+				console.log("brrr");
+				let coordinates = [a.parentElement.rowIndex, a.cellIndex];
+				this.customCalculatePath(coordinates);
+			}
+		}.bind(this));
+	}
+	
 }
 
 function whichLineEnding(source) {
@@ -554,32 +554,26 @@ mazePicker.addEventListener("change", function(e){
 			document.getElementById("loadOnLocalServerOK").focus();
 			return;
 		}else{
-				//is not local server
-				if(location.hostname.endsWith("github.io")){
-					mazeUrl = window.location.href + mazeSelected;
-				}else{
-					//is local server
-					mazeUrl = "/"  + mazeSelected;
-				}	
+			mazeUrl = "./"  + mazeSelected;
 		}
 		
 		fetch(mazeUrl)
 		.then( r => r.text() )
-   	.then( t => {
-   		//Fun fact: when I don't stop the previous instance, I can have 5 mazes running at the same time no problem, and even responsive design works :)
-   		if(mazeAppClassHolderVariable != undefined){
-   			mazeAppClassHolderVariable.zcelaHotovo = true;
-   			mazeAppClassHolderVariable.hideMaze();
-   		}
-   		mazeAppClassHolderVariable = new BFSMazeApp();
-		let lineEnding = whichLineEnding(t);
-		if(lineEnding == "CRLF"){
-			mazeAppClassHolderVariable.renderMaze(t.split("\r\n"));
-		}else if(lineEnding == "LF"){
-			mazeAppClassHolderVariable.renderMaze(t.split("\n"));
-		}
-		mazeAppClassHolderVariable.startBFS();
-   	});
+		.then( t => {
+			//Fun fact: when I don't stop the previous instance, I can have 5 mazes running at the same time no problem, and even responsive design works :)
+			if(mazeAppClassHolderVariable != undefined){
+				mazeAppClassHolderVariable.zcelaHotovo = true;
+				mazeAppClassHolderVariable.hideMaze();
+			}
+			mazeAppClassHolderVariable = new BFSMazeApp();
+			let lineEnding = whichLineEnding(t);
+			if(lineEnding == "CRLF"){
+				mazeAppClassHolderVariable.renderMaze(t.split("\r\n"));
+			}else if(lineEnding == "LF"){
+				mazeAppClassHolderVariable.renderMaze(t.split("\n"));
+			}
+			mazeAppClassHolderVariable.startBFS();
+		});
 	}
 });
 
@@ -587,8 +581,8 @@ mazePicker.addEventListener("change", function(e){
 document.getElementById('inputfile').addEventListener('change', function(event) {
 	console.log(event);
 	let text = "";
-    var fr=new FileReader();
-    fr.onload=function(){
+    var fr = new FileReader();
+    fr.onload = function(){
 		let lineEnding = whichLineEnding(fr.result);
 		if(lineEnding == "CRLF"){
 			text = fr.result.split("\r\n");
@@ -611,11 +605,11 @@ document.getElementById('inputfile').addEventListener('change', function(event) 
 function wait(ms) {
 	if(ms > 0){
 		return new Promise((resolve, reject) => {
-	    setTimeout(() => {
-	      resolve(ms)
-	    }, ms )
-	  })
+			setTimeout(() => {
+			resolve(ms)
+	    	}, ms )
+		});
 	}else{
-			return;
-		}
+		return;
+	}
 }
